@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, reverse
+from django.urls import reverse_lazy
 from django.views import generic, View
 from django.http import HttpResponseRedirect
 from .models import Post
 from .forms import CommentForm
+from django.views.generic.edit import CreateView
 
 
 class PostList(generic.ListView):
@@ -65,6 +67,7 @@ class PostDetail(View):
             },
         )
 
+
 class PostLike(View):
 
     def post(self, request, slug):
@@ -76,3 +79,15 @@ class PostLike(View):
             post.likes.add(request.user)
         
         return HttpResponseRedirect(reverse('post_detail', args=[slug]))
+
+
+class PostCreateView(CreateView):
+    model = Post
+    form_class = CommentForm
+    template_name = 'post_create.html'
+    success_url = reverse_lazy('')
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+        
